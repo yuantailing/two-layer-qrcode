@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+		<title>Two-Layer QR Codes</title>
+		<!--link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet"-->
+		<!--script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}"></script-->
+		<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+		<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js" integrity="sha384-xBuQ/xzmlsLoJpyjoggmTEz8OWUFM0/RC5BsqQBDX2v5cMvDHcMakNTNrHIW2I5f" crossorigin="anonymous"></script>
+	</head>
+	<body>
+		<div class="container">
+			<h1 class="text-center">Two-Layer QR Codes</h1>
+			<p class="text-center"><a href="https://doi.org/10.1109/TIP.2019.2908490">https://doi.org/10.1109/TIP.2019.2908490</a></p>
+			<div>
+				<form id="encode-form" action="encode" method="POST">
+					<div class="row">
+						<div class="form-group col-md-6">
+							<label for="str_left">Message 1</label>
+							<textarea class="form-control" id="str_left" name="str_left">HTTP://WWW.TSINGHUA.EDU.CN/</textarea>
+						</div>
+						<div class="form-group col-md-6">
+							<label for="str_right">Message 2</label>
+							<textarea class="form-control" id="str_right" name="str_right">TSINGHUA UNIVERSITY . BEIJING . CHINA</textarea>
+						</div>
+					</div>
+					<div class="row">
+						<div class="form-group col-md-2">
+							<label for="mode">Mode</label>
+							<select class="form-control" id="mode" name="mode">
+								<option value="art">Art QR Code</option>
+								<option value="classical">Classical QR Code</option>
+							</select>
+						</div>
+						<div class="form-group col-md-2">
+							<label for="version">Version</label>
+							<select class="form-control" id="version" name="version">
+								<option value="1">1</option>
+								<option value="2">2</option>
+								<option value="3">3</option>
+								<option value="4">4</option>
+								<option value="5">5</option>
+								<option value="6">6</option>
+								<option value="7">7</option>
+								<option value="8">8</option>
+								<option value="9">9</option>
+								<option value="10" selected>10</option>
+								<option value="11">11</option>
+								<option value="12">12</option>
+								<option value="13">13</option>
+								<option value="14">14</option>
+								<option value="15">15</option>
+								<option value="16">16</option>
+								<option value="17">17</option>
+								<option value="18">18</option>
+								<option value="19">19</option>
+								<option value="20">20</option>
+							</select>
+						</div>
+						<div class="form-group col-md-2">
+							<label for="level">EC level</label>
+							<select class="form-control" id="level" name="level">
+								<option value="L" selected>L (7%)</option>
+								<option value="M">M (15%)</option>
+								<option value="Q">Q (25%)</option>
+								<option value="H">H (30%)</option>
+							</select>
+						</div>
+						<div class="form-group col-md-6">
+							<label for="image">Image</label>
+							<input class="form-control" type="file" id="image">
+						</div>
+					</div>
+					<div class="form-group">
+						<button class="btn btn-primary" id="submit">Encode</button>
+					</div>
+				</form>
+			</div>
+			<div id="results">
+			</div>
+		</div>
+		<script>
+'use strict';
+
+function draw_qrcode_matrix(matrix) {
+	var wrap = $('<div></div>');
+	wrap.css('position', 'relative');
+	wrap.css('height', '0');
+	wrap.css('width', '100%');
+	wrap.css('padding-bottom', '100%');
+	wrap.css('background-color', '#fff');
+	var n = matrix.length;
+	var border = 0;
+	var colormap = {
+		0: '#fff',
+		1: '#000',
+		'-1': '#bfb',
+		2: '#f00',
+	};
+	for (var i in matrix) {
+		for (var j in matrix[i]) {
+			var x = matrix[i][j];
+			var bit = $('<div></div>');
+			bit.css('position', 'absolute');
+			bit.css('top', border + (100 - border * 2) * i / n + '%');
+			bit.css('left', border + (100 - border * 2) * j / n + '%');
+			bit.css('height', ((100 - border * 2) * 1.01 / n) + '%');
+			bit.css('width', ((100 - border * 2) * 1.01 / n) + '%');
+			bit.css('background-color', colormap[x]);
+			wrap.append(bit);
+		}
+	}
+	var outer = $('<div></div>');
+	outer.css('width', '200px');
+	outer.append(wrap);
+	return outer;
+}
+
+function draw_qrcode(b64str) {
+	var p = $('<p></p>');
+	var img = $('<img>');
+	img.attr('src', b64str);
+	img.attr('alt', 'a qrcode-like matrix');
+	img.css('width', '100%');
+	img.css('image-rendering', 'pixelated');
+	p.append(img)
+	return p;
+}
+
+function raw_text(text) {
+	var tag = $('<p></p>');
+	tag.text(text);
+	return tag;
+}
+
+$('#encode-form').on('submit', function (event) {
+	event.preventDefault();
+	document.getElementById('submit').setAttribute('disabled', '');
+	function send(file_content) {
+		var i = 0;
+		var obj = Object();
+		while (1) {
+			if (!(i in event.target))
+				break;
+			var name = event.target[i].name;
+			var value = event.target[i].value;
+			if (!!name)
+				obj[name] = value;
+			i++;
+		}
+		obj['image'] = file_content;
+		$('#results').empty();
+		$('#results').append('wait for 5-30 seconds ...');
+		var start_time = new Date().getTime();
+		$.ajax({
+			url: event.target.action,
+			type: event.target.method,
+			data: obj,
+			dataType: 'json',
+			success: function (data) {
+				$('#results').empty();
+				if (data.error) {
+					$('#results').append(raw_text(data.msg).css('color', 'red'));
+				} else {
+					function get_recovery_ratio(block_length, ecc_num, error) {
+						var num = block_length[0];
+						var den = block_length[0];
+						for (var i in error) {
+							var can_recover = (ecc_num / 2 | 0) - error[i];
+							if (can_recover / block_length[i] < num / den) {
+								num = can_recover;
+								den = block_length[i];
+							}
+						}
+						return num + '/' + den;
+					}
+					var max_error_left = Math.max.apply(null, data.error_left);
+					var max_error_right = Math.max.apply(null, data.error_right);
+					if (max_error_left * 2 > data.ecc_num[0] || max_error_right * 2 > data.ecc_num[1]) {
+						var p = $('<p></p>');
+						p.text('Error: too many ECC errors, cannot be decoded.')
+						p.css('color', 'red');
+						$('#results').append(p);
+					}
+					var row = $('<div></div>');
+					row.addClass('row');
+					[
+						['Bottom layer', 'Ver=' + data.version + ', ECL=' + data.level[0] + ',' + data.level[1] + ', Mask=' + data.mask_id[0] + ',' + data.mask_id[1], data.layer_down],
+						['Top layer', 'error capacity = ' + (data.ecc_num[0] / 2 | 0) + '/' + data.block_length[0][data.block_length[0].length - 1] + ', ' +  (data.ecc_num[1] / 2 | 0) + '/' + data.block_length[1][data.block_length[1].length - 1], data.layer_up],
+						['Left view', 'recovery ratio = ' + get_recovery_ratio(data.block_length[0], data.ecc_num[0], data.error_left), data.qrcode_left],
+						['Right view', 'recovery ratio = ' + get_recovery_ratio(data.block_length[1], data.ecc_num[1], data.error_right), data.qrcode_right],
+					].map(function (elem) {
+						var col = $('<div></div>');
+						col.addClass('col-md-3');
+						col.css('padding', '.3%');
+						var p = $('<p></p>');
+						p.addClass('text-center');
+						p.text(elem[0]);
+						col.append(p);
+						p = $('<p></p>');
+						p.addClass('text-center');
+						p.text(elem[1]);
+						col.append(p);
+						var qrcode = draw_qrcode(elem[2]);
+						qrcode.css('width', '100%');
+						col.append(qrcode);
+						row.append(col);
+					});
+					$('#results').append(row);
+					var row = $('<div></div>');
+					row.text('Time cost is ' + (new Date().getTime() - start_time) + ' ms from sending the request to the response is rendered.');
+					row.css('margin-top', '20px');
+					$('#results').append(row);
+				}
+			},
+			error: function (e) {
+				$('#results').empty();
+				var p = $('<p></p>');
+				p.text('AJAX failed');
+				p.css('color', 'red');
+				$('#results').append(p);
+				p = $('<p></p>');
+				p.text('ready state: ' + e.readyState);
+				p.css('color', 'red');
+				$('#results').append(p);
+				p = $('<p></p>');
+				p.text('status: ' + e.statusText);
+				p.css('color', 'red');
+				$('#results').append(p);
+			},
+			complete: function () {
+				document.getElementById('submit').removeAttribute('disabled');
+			},
+		});
+	}
+	var files = $('input#image')[0].files;
+	if (0 == files.length) {
+		send(null);
+	} else {
+		var reader = new FileReader();
+		reader.onload = function (e) {
+			var file_content = e.target.result;
+			if (file_content.length > 2 * 1024 ** 2) {
+				alert('file size too large');
+			}
+			send(file_content);
+		}
+		reader.readAsBinaryString(files[0]);
+	}
+});
+		</script>
+	</body>
+</html>

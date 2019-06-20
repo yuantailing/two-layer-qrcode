@@ -1,0 +1,5 @@
+*.pyc
+*.exe
+*.bin
+
+/qrmerge/logo.png
