@@ -12,6 +12,8 @@ def lambda_handler(event, context):
     version = event['body-json']['version']
     level = event['body-json']['level']
     image = event['body-json']['image']
+    if image:
+        image = base64.b64decode(image)
 
     shutil.copy('qrmerge/main.exe', '/tmp/main.exe')
     os.chmod('/tmp/main.exe', 0o755)

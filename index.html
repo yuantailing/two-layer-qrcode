@@ -148,7 +148,7 @@ $('#encode-form').on('submit', function (event) {
 				obj[name] = value;
 			i++;
 		}
-		obj['image'] = file_content;
+		obj['image'] = file_content && btoa(file_content);
 		$('#results').empty();
 		$('#results').append('wait for 5-30 seconds ...');
 		var start_time = new Date().getTime();
