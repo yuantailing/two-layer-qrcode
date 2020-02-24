@@ -20,6 +20,8 @@ def encode():
     version = request.form.get('version')
     level = request.form.get('level')
     image = request.form.get('image')
+    if image:
+        image = base64.b64decode(image)
     coded = qrmerge.ui.encode(str_left, str_right, mode, version, level, level, image)
     if coded['error']:
         return jsonify(coded)

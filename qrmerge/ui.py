@@ -44,7 +44,7 @@ def encode(s1, s2, mode, version, level1, level2, image=None, timeout=100, debug
 
     if mode == 'art':
         if image:
-            input = io.BytesIO(image.encode('latin1'))
+            input = io.BytesIO(image)
             img = Image.open(input)
         else:
             img = Image.open('qrmerge/logo.png')

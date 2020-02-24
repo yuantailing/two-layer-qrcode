@@ -6,8 +6,8 @@
 		<title>Two-Layer QR Codes</title>
 		<!--link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet"-->
 		<!--script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}"></script-->
-		<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-		<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js" integrity="sha384-xBuQ/xzmlsLoJpyjoggmTEz8OWUFM0/RC5BsqQBDX2v5cMvDHcMakNTNrHIW2I5f" crossorigin="anonymous"></script>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+		<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 	</head>
 	<body>
 		<div class="container">
@@ -149,7 +149,7 @@ $('#encode-form').on('submit', function (event) {
 				obj[name] = value;
 			i++;
 		}
-		obj['image'] = file_content;
+		obj['image'] = file_content && btoa(file_content);
 		$('#results').empty();
 		$('#results').append('wait for 5-30 seconds ...');
 		var start_time = new Date().getTime();
