@@ -179,7 +179,7 @@ $('#encode-form').on('submit', function (event) {
 					var max_error_right = Math.max.apply(null, data.error_right);
 					if (max_error_left * 2 > data.ecc_num[0] || max_error_right * 2 > data.ecc_num[1]) {
 						var p = $('<p></p>');
-						p.text('Error: too many ECC errors, cannot be decoded.')
+						p.text('Error: too many ECC errors, cannot be decoded.');
 						p.css('color', 'red');
 						$('#results').append(p);
 					}
