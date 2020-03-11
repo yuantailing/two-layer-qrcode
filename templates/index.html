@@ -30,7 +30,7 @@
 							<label for="mode">Mode</label>
 							<select class="form-control" id="mode" name="mode">
 								<option value="art">Art QR Code</option>
-								<option value="classical">Classical QR Code</option>
+								<option value="classic">Classic QR Code</option>
 							</select>
 						</div>
 						<div class="form-group col-md-2">
@@ -242,9 +242,11 @@ $('#encode-form').on('submit', function (event) {
 		reader.onload = function (e) {
 			var file_content = e.target.result;
 			if (file_content.length > 2 * 1024 ** 2) {
-				alert('file size too large');
+				alert('file too large');
+				document.getElementById('submit').removeAttribute('disabled');
+			} else {
+				send(file_content);
 			}
-			send(file_content);
 		}
 		reader.readAsBinaryString(files[0]);
 	}
