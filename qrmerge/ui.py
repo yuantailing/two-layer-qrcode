@@ -210,11 +210,11 @@ def draw_qrcode(fp, qrmatrix, bg_color='white'):
     pic = Image.new('RGBA', [(len(qrmatrix) + 4) * unit_len] * 2, bg_color)
     for line in qrmatrix:
         for module in line:
-            if module is 0 or module is False:
+            if module == 0 or module is False:
                 draw_a_unit(pic, x, y, unit_len, (255, 255, 255, 255))
-            elif module is 1 or module is True:
+            elif module == 1 or module is True:
                 draw_a_unit(pic, x, y, unit_len, (0, 0, 0, 255))
-            elif module is -1:
+            elif module == -1:
                 draw_a_unit(pic, x, y, unit_len, bg_color)
             else:
                 draw_a_unit(pic, x, y, unit_len, (0, 0, 255, 255))
